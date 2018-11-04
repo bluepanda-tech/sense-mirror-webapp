@@ -3,6 +3,7 @@ import os
 MAX_PRODUCTS = 10
 MAX_STORED_MEDIA_FILES = 3
 BASE_MEDIA_DIR = '/home/hacknoob/Desktop/media/items'
+ALLOWED_FILE_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'mp4'])
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
