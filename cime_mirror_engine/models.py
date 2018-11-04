@@ -1,38 +1,70 @@
 from .app import db
-from .config import MAX_PRODUCTS, BASE_MEDIA_DIR
+from .config import MAX_PRODUCTS, MAX_STORED_MEDIA_FILES, BASE_MEDIA_DIR
 
 class Product(db.Model):
     """Products to be showcased by the UI"""
     __tablename__ = "products"
 
-    product_id = db.Column(db.Integer, primary_key=True)
-    item_num = db.Column(db.Integer, unique=True, nullable=False) # From 1 - MAX_PRODUCTS
+    product_id = db.Column(db.Integer, primary_key=True) # Only from 1 - MAX_PRODUCTS
     name = db.Column(db.String(80), nullable=False)
-    is_displayed = db.Column(db.Boolean, default=False)
-    media_path = db.Column(db.String(80), unique=True, nullable=False)
-    stored_media_files = db.Column(db.Integer, nullable=False, default=0) # Number of multimedia resources, must be < MAX_STORED_MEDIA_RESOURCES
     description_txt = db.Column(db.Text)
+    media_files = db.relationship('MediaFile', backref='product', lazy=True)
+    thumbnail_path = db.Column(db.Text, default=None)
+    is_displayed = db.Column(db.Boolean, nullable=False, default=False)
 
-    def __init__(self, item_num):
-        if self.item_num_is_valid(item_num) and not self.item_exists(item_num):
-            self.item_num = item_num
-            self.name = "Item {}".format(item_num)
-            self.media_path = '{}/{}'.format(BASE_MEDIA_DIR, item_num) #TODO add test to assert base directory exists
-        elif self.item_exists(item_num):
+    def __init__(self, product_id):
+        if self.allowed_product_id(product_id) and not self.item_exists(product_id):
+            try:
+                self.product_id = product_id
+                self.name = "Item {}".format(product_id)
+            except Exception as e:
+                #TODO log this
+                return e
+        elif self.item_exists(product_id):
             #TODO test this
-            raise ValueError('Item {} already exists'.format(item_num))
+            raise ValueError('Item {} already exists'.format(product_id))
         else:
-            raise ValueError('Invalid item number', item_num)
+            raise ValueError('Invalid item number', product_id)
 
-    def item_exists(self, item_num):
+    def item_exists(self, product_id):
         """Checks if the item already exists based on the item number"""
-        exists = Product.query.filter_by(item_num=item_num).scalar() is not None
+        exists = Product.query.filter_by(product_id=product_id).scalar() is not None
         return exists
 
-    def item_num_is_valid(self, item_num):
-        """Checks if item_num is an int, positive and less than MAX_PRODUCTS"""
-        is_valid = (isinstance(item_num, int)) and (item_num > 0) and (item_num <= MAX_PRODUCTS)
+    def allowed_product_id(self, product_id):
+        """Checks if product_id is an int, positive and less than MAX_PRODUCTS"""
+        is_valid = (isinstance(product_id, int)) and (product_id > 0) and (product_id <= MAX_PRODUCTS)
         return is_valid
 
     def __repr__(self):
         return "{}".format(self.name)
+
+class MediaFile(db.Model):
+    """Paths to media files to be displayed in the product's description"""
+    __tablename__ = 'media_files'
+    
+    file_id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.product_id'), nullable=False)
+    file_path = db.Column(db.Text, unique=True, nullable=False)
+
+    def __init__(self, product_id, file_path):
+        if MediaFile.query.filter_by(product_id=product_id).count() < MAX_STORED_MEDIA_FILES and self.allowed_filepath(file_path):
+            try:
+                self.product_id = product_id
+                self.file_path = file_path
+            except Exception as e:
+                #TODO log this
+                return e
+        elif MediaFile.query.filter_by(product_id=product_id).count() >= MAX_STORED_MEDIA_FILES:
+            raise ValueError('Reached Max Number of Media files for this product')
+        else:
+            raise ValueError('File path not allowed')
+    
+    def allowed_filepath(self, file_path):
+        """Checks if path is a string and inside the base media directory"""
+        is_valid = (isinstance(file_path, str)) and BASE_MEDIA_DIR in file_path
+        return is_valid
+    
+    def __repr__(self):
+        return "{}".format(self.file_path)
+    
