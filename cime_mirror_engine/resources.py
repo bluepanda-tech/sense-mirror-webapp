@@ -39,12 +39,11 @@ class UploadThumbnail(Resource):
             if old_filename is not None:
                 os.remove(os.path.join(BASE_MEDIA_DIR, old_filename))
             return "File Uploaded"
-        elif not allowed_file(file.filename, ALLOWED_FILE_EXTENSIONS):
-            return 'File not allowed. Upload only {} files'.format([ftype for ftype in ALLOWED_FILE_EXTENSIONS])
-        elif Product.product_exists(product_id):
-            return 'Item {} already exists'.format(product_id)
         else:
-            return 'Invalid item number: {}'.format(product_id)
+            #TODO add bad status codes to this type of responses
+            return 'File not allowed. Upload only {} files'.format(
+                [ftype for ftype in ALLOWED_FILE_EXTENSIONS]
+            )
 api.add_resource(UploadThumbnail, '/api/thumbnail/<string:product_id>')
 
 class MediaFiles(Resource):
@@ -69,6 +68,10 @@ class MediaFiles(Resource):
             return "Product reached max number of mediafiles: {}".format(MAX_STORED_MEDIA_FILES)
         elif not Product.product_exists(product_id):
             return "Product ID is invalid."
+api.add_resource(MediaFiles, '/api/mediafile/<string:product_id>')
+
+class DeleteMediaFiles(Resource):
+    """Deletes Media files based on their filename"""
 
     def delete(self, filename):
         """Delete a media file"""
@@ -80,4 +83,4 @@ class MediaFiles(Resource):
             return "File Deleted"
         else:
             return "File doesn't exist"
-api.add_resource(MediaFiles, '/api/mediafile/<string:product_id>')
+api.add_resource(DeleteMediaFiles, '/api/mediafile/<string:filename>')
