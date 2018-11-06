@@ -9,7 +9,7 @@ class Product(db.Model):
     product_id = db.Column(db.Integer, primary_key=True) # Only from 1 - MAX_PRODUCTS
     name = db.Column(db.String(80), nullable=False)
     description_txt = db.Column(db.Text)
-    media_files = db.relationship('MediaFile', backref='product', lazy=True)
+    media_files = db.relationship('MediaFile', backref='product', lazy=True, cascade="all, delete-orphan")
     thumbnail = db.Column(db.Text, default=None) # Name of thumbnail file
     is_displayed = db.Column(db.Boolean, nullable=False, default=True)
 
