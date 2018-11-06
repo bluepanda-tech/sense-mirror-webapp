@@ -1,16 +1,18 @@
 from cime_mirror_engine.app import app, db
 from cime_mirror_engine import models
+from cime_mirror_engine.utils import allowed_product_id
 from cime_mirror_engine.config import MAX_PRODUCTS
 
 def create_items():
-    for product in range(MAX_PRODUCTS):
-        try:
-            product_id = product + 1
-            new_product = models.Product(product_id=product_id)
+    """Creates all products in the DB"""
+    for product_id in range(MAX_PRODUCTS):
+        if not models.Product.product_exists(product_id+1) and \
+        allowed_product_id(product_id+1, MAX_PRODUCTS):
+            new_product = models.Product(product_id+1)
             db.session.add(new_product)
-        except Exception as e:
+        else:
             #TODO log this or something
-            print(e)
+            print("Product already exists")
     db.session.commit()
 
 if __name__ == '__main__':
