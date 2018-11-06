@@ -1,5 +1,4 @@
 import os
-import requests
 import pytest
 
 from run import create_items
@@ -124,6 +123,8 @@ def test_mediafiles_delete():
     response = client.delete('/api/mediafile/{}'.format(
         m_filename,
     ))
+    # Check response
+    assert response.data == b'"File Deleted"\n' 
     # Check MediaFile object no longer exists
     assert MediaFile.query.get(m_filename) is None
     # Check product does still exists (wasn't deleted in cascade)
