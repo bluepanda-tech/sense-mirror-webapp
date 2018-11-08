@@ -24,7 +24,7 @@ class Product(db.Model):
         """Updates the name of the file"""
         if allowed_file(filename, ALLOWED_FILE_EXTENSIONS):
             self.thumbnail = filename
-        else: 
+        else:
             raise ValueError('Thumbnail filename not allowed')
 
     def product_exists(product_id):
