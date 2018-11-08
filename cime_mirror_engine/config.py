@@ -18,7 +18,7 @@ class Dev(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class Prod(Config):
-    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+    SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:' #TODO os.environ['DATABASE_URL']
 
 class Test(Dev):
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
