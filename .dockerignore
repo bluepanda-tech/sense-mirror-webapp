@@ -12,3 +12,6 @@ README.md
 LICENSE
 .vscode
 **.pyc
+**tests/
+**environment.dev.yml
+**environment.test.yml

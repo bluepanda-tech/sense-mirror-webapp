@@ -2,10 +2,14 @@ import os
 
 MAX_PRODUCTS = 10
 MAX_STORED_MEDIA_FILES = 3
-BASE_MEDIA_DIR = '/home/hacknoob/Desktop/media/items'
+BASEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+BASE_MEDIA_DIR = os.path.join(BASEDIR, 'media')
 ALLOWED_FILE_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'mp4'])
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+def create_mediafiles_folder():
+    """Creates folder where media will be stored if not exists"""
+    if not os.path.exists(BASE_MEDIA_DIR):
+        os.makedirs(BASE_MEDIA_DIR)
 
 class Config:
     DEBUG = False
