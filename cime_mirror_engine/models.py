@@ -24,10 +24,12 @@ class User(db.Model):
         # This PIN is given right at the beginning and needs to
         # be written down.
         #TODO set up an email client for changing the password
-        if User.query.count() == 0:
+        if User.query.count() == 0 and len(password) == 4 and password.isdigit():
             self.set_password(str(password))
+        elif User.query.count() != 0:
+            raise ValueError("A user and a password were already set")
         else:
-            raise ValueError('A user and a password were already set')
+            raise ValueError("Invalid PIN. Must be a 4-digit number")
 
     def set_password(self, password):
         self.pw_hash = generate_password_hash(password)

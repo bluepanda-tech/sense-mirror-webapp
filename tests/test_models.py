@@ -1,33 +1,10 @@
-"""Unit tests for models and APIs"""
-import os
+"""Unit tests for models and their methods"""
 import pytest
-import requests
-from flask_login import login_user
 
 from run import create_items
 from cime_mirror_engine.app import app, db
 from cime_mirror_engine.models import Product, MediaFile, User
-from cime_mirror_engine.config import (
-    Test,
-    BASE_MEDIA_DIR,
-    MAX_PRODUCTS,
-)
-
-#Configuration is changed for testing
-app.config.from_object(Test)
-db.create_all()
-client = app.test_client()
-test_user = User('1234')
-db.session.add(test_user)
-db.session.commit()
-response = client.post(
-    '/auth/login',
-    data={'pin' : '1234'},
-)
-
-##########################################
-#### TESTING MODELS AND THEIR METHODS ####
-##########################################
+from cime_mirror_engine.config import MAX_PRODUCTS
 
 def test_db_connection():
     """Making sure we are not messing around with the actual db"""
@@ -37,6 +14,42 @@ def test_db_connection():
     except AssertionError:
         pytest.exit("Database URI wasn't changed")
 
+#######################################
+#########  USER MODEL TESTS ###########
+#######################################
+def test_user():
+    """Test the creation and validation of users. Also makes
+    sure that only one user can exist at a time."""
+    pin = '1234'
+    invalid_pin_1 = '12345'
+    invalid_pin_2 = 'O123' # Letter O
+    if User.query.count() != 0:
+        # Checks if another user was already created... Since we
+        # want to test the whole process
+        user = User.query.first()
+        db.session.delete(user)
+    with pytest.raises(ValueError):
+        # Tries to create user PIN with >4 digits
+        new_user = User(invalid_pin_1)
+    with pytest.raises(ValueError):
+        # Tries to create user PIN with letters
+        new_user = User(invalid_pin_2)
+    new_user = User(pin)
+    db.session.add(new_user)
+    db.session.commit()
+    assert User.query.first() is not None
+    assert User.query.count() == 1
+    assert new_user.is_authenticated()
+    assert new_user.is_active()
+    assert not new_user.is_anonymous()
+    with pytest.raises(ValueError):
+        # Make sure not other user is created
+        another_user = User(pin)
+    assert new_user.check_password(pin)
+
+########################################
+#########  PRODUCT MODEL TESTS #########
+########################################
 def test_create_items():
     """Tests functions that creates initial Product objects"""
     create_items()
@@ -67,7 +80,11 @@ def test_product_exists():
         product_id = i + 1
         assert Product.product_exists(product_id)
     assert not Product.product_exists(MAX_PRODUCTS+1)
+####### END PRODUCT MODEL TESTS ########
 
+########################################
+######## MEDIAFILES MODEL TESTS ########
+########################################
 def test_mediafiles():
     """Testing the creation of mediafile objects"""
     product_id = 1
@@ -85,68 +102,4 @@ def test_mediafiles():
     # Remove sample file
     db.session.delete(medfile)
     db.session.commit()
-
-#########################################
-## TESTING RESOURCES AND THEIR METHODS ##
-#########################################
-
-def test_uploadthumbnail():
-    """Tests the function that uploads a thumbnail"""
-    product_id = 1
-    with open('./tests/etc/sample.jpg', 'rb') as file:
-        response = client.post(
-            '/api/thumbnail/{}'.format(product_id),
-            data={'file' : file},
-            content_type='multipart/form-data'
-        )
-        # Check responses
-        assert response.status_code == 200
-        assert response.data == b'"File Uploaded"\n'
-    prod = Product.query.get(1)
-    tn_filename = prod.thumbnail
-    # Check file gets saved
-    assert os.path.exists(os.path.join(BASE_MEDIA_DIR, tn_filename))
-    # Doing it again to check old file gets deleted
-    with open('./tests/etc/sample.jpg', 'rb') as file:
-        response = client.post(
-            '/api/thumbnail/{}'.format(product_id),
-            data={'file' : file},
-            content_type='multipart/form-data',
-        )
-    assert not os.path.exists(os.path.join(BASE_MEDIA_DIR, tn_filename))
-    # Remove image
-    filename = Product.query.get(product_id).thumbnail
-    os.remove(os.path.join(BASE_MEDIA_DIR, filename))
-
-def test_mediafiles_post():
-    """Tests the function that uploads a thumbnail"""
-    product_id = 1
-    with open('./tests/etc/sample.jpg', 'rb') as file:
-        response = client.post(
-            '/api/mediafile/{}'.format(product_id),
-            data={'file' : file},
-            content_type='multipart/form-data'
-        )
-        # Check responses
-        assert response.status_code == 200
-        assert response.data == b'"File Uploaded"\n'
-    mediafile = MediaFile.query.filter_by(product_id=1).one()
-    m_filename = mediafile.filename
-    # Check file gets saved
-    assert os.path.exists(os.path.join(BASE_MEDIA_DIR, m_filename))
-
-def test_mediafiles_delete():
-    """Tests the deletion of media files"""
-    mediafile = MediaFile.query.filter_by(product_id=1).one()
-    m_filename = mediafile.filename
-    response = client.delete('/api/mediafile/{}'.format(
-        m_filename,
-    ))
-    # Check response
-    assert response.data == b'"File Deleted"\n' 
-    # Check MediaFile object no longer exists
-    assert MediaFile.query.get(m_filename) is None
-    # Check product does still exists (wasn't deleted in cascade)
-    assert Product.query.get(1) is not None
-    # Check file got deleted from path
-    assert not os.path.exists(os.path.join(BASE_MEDIA_DIR, m_filename))
+####### END MEDIAFILES MODEL TESTS ########

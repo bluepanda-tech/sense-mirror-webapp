@@ -58,7 +58,7 @@ class UploadThumbnail(Resource):
             )
 api.add_resource(UploadThumbnail, '/api/thumbnail/<string:product_id>')
 
-class MediaFiles(Resource):
+class AddMediaFile(Resource):
     """Upload or delete media files to be shown in the product's description"""
     method_decorators = [login_required]
     def post(self, product_id):
@@ -81,9 +81,9 @@ class MediaFiles(Resource):
             return "Product reached max number of mediafiles: {}".format(MAX_STORED_MEDIA_FILES)
         elif not Product.product_exists(product_id):
             return "Product ID is invalid."
-api.add_resource(MediaFiles, '/api/mediafile/<string:product_id>')
+api.add_resource(AddMediaFile, '/api/mediafile/<string:product_id>')
 
-class DeleteMediaFiles(Resource):
+class DeleteMediaFile(Resource):
     """Deletes Media files based on their filename"""
     method_decorators = [login_required]
     def delete(self, filename):
@@ -96,4 +96,4 @@ class DeleteMediaFiles(Resource):
             return "File Deleted"
         else:
             return "File doesn't exist"
-api.add_resource(DeleteMediaFiles, '/api/mediafile/<string:filename>')
+api.add_resource(DeleteMediaFile, '/api/mediafile/<string:filename>')
