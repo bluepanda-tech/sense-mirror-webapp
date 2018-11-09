@@ -1,9 +1,12 @@
+"""Unit tests for models and APIs"""
 import os
 import pytest
+import requests
+from flask_login import login_user
 
 from run import create_items
 from cime_mirror_engine.app import app, db
-from cime_mirror_engine.models import Product, MediaFile
+from cime_mirror_engine.models import Product, MediaFile, User
 from cime_mirror_engine.config import (
     Test,
     BASE_MEDIA_DIR,
@@ -12,7 +15,15 @@ from cime_mirror_engine.config import (
 
 #Configuration is changed for testing
 app.config.from_object(Test)
+db.create_all()
 client = app.test_client()
+test_user = User('1234')
+db.session.add(test_user)
+db.session.commit()
+response = client.post(
+    '/auth/login',
+    data={'pin' : '1234'},
+)
 
 ##########################################
 #### TESTING MODELS AND THEIR METHODS ####
@@ -31,7 +42,7 @@ def test_create_items():
     create_items()
     assert len(Product.query.all()) == MAX_PRODUCTS
 
-def test_Product():
+def test_product():
     """Testing creation of Product objects"""
     with pytest.raises(ValueError):
         # Tests no duplicate product will be made
@@ -41,7 +52,7 @@ def test_Product():
         anotherprod = Product(MAX_PRODUCTS+1)
     assert Product.query.get(MAX_PRODUCTS).name == "Item {}".format(MAX_PRODUCTS)
 
-def test_Product_add_thumbnail_filename():
+def test_product_add_thumbnail_filename():
     """Tests adding a thumbnail filename"""
     prod = Product.query.get(1)
     prod.add_thumbnail_filename('file.png')
@@ -57,7 +68,8 @@ def test_product_exists():
         assert Product.product_exists(product_id)
     assert not Product.product_exists(MAX_PRODUCTS+1)
 
-def test_MediaFiles():
+def test_mediafiles():
+    """Testing the creation of mediafile objects"""
     product_id = 1
     filename = 'file.jpg'
     # Adding new filename to db
@@ -96,8 +108,15 @@ def test_uploadthumbnail():
     assert os.path.exists(os.path.join(BASE_MEDIA_DIR, tn_filename))
     # Doing it again to check old file gets deleted
     with open('./tests/etc/sample.jpg', 'rb') as file:
-        response = client.post('/api/thumbnail/1', data={'file' : file}, content_type='multipart/form-data')
+        response = client.post(
+            '/api/thumbnail/{}'.format(product_id),
+            data={'file' : file},
+            content_type='multipart/form-data',
+        )
     assert not os.path.exists(os.path.join(BASE_MEDIA_DIR, tn_filename))
+    # Remove image
+    filename = Product.query.get(product_id).thumbnail
+    os.remove(os.path.join(BASE_MEDIA_DIR, filename))
 
 def test_mediafiles_post():
     """Tests the function that uploads a thumbnail"""

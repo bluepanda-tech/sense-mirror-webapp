@@ -1,11 +1,20 @@
+"""Contains main API resources"""
 import os, uuid
 
 from flask import request
 from flask_restful import Resource
 from werkzeug.utils import secure_filename
+from flask_login import login_required
 
-from .app import app, api, db
-from .models import Product, MediaFile
+from .app import (
+    app,
+    api,
+    db,
+)
+from .models import (
+    Product,
+    MediaFile,
+)
 from .config import (
     BASE_MEDIA_DIR,
     ALLOWED_FILE_EXTENSIONS,
@@ -18,7 +27,7 @@ from .utils import (
 
 class UploadThumbnail(Resource):
     """Upload either a video or an image file to be used as the product thumbnail"""
-        
+    method_decorators = [login_required]
     def post(self, product_id):
         """API endpoint to upload a product's thumbnail"""
 
@@ -29,7 +38,10 @@ class UploadThumbnail(Resource):
         if file and allowed_file(file.filename, ALLOWED_FILE_EXTENSIONS):
             product = Product.query.get(product_id)
             old_filename = product.thumbnail
-            filename = secure_filename("{}.{}".format(str(uuid.uuid4())[:8], file_type(file.filename)))
+            filename = secure_filename("{}.{}".format(
+                str(uuid.uuid4())[:8], # Generates 8-digit uuid
+                file_type(file.filename)
+            )) # appends the file type to it
             file.save(os.path.join(BASE_MEDIA_DIR, filename))
             product.add_thumbnail_filename(filename)
             db.session.add(product)
@@ -48,12 +60,13 @@ api.add_resource(UploadThumbnail, '/api/thumbnail/<string:product_id>')
 
 class MediaFiles(Resource):
     """Upload or delete media files to be shown in the product's description"""
-
+    method_decorators = [login_required]
     def post(self, product_id):
         """Upload a mediafile"""
         file = request.files['file']
         if file and allowed_file(file.filename, ALLOWED_FILE_EXTENSIONS) and MediaFile.query.filter_by(product_id=product_id).count() < MAX_STORED_MEDIA_FILES and Product.product_exists(product_id):
-            # file must be allowed, product_id must exist and media files should be less than max allowed
+            # file must be allowed, product_id must exist and
+            # media files should be less than max allowed
             #TODO log this and better error handling
             filename = secure_filename("{}.{}".format(str(uuid.uuid4())[:8], file_type(file.filename)))
             file_path = os.path.join(BASE_MEDIA_DIR, filename)
@@ -72,7 +85,7 @@ api.add_resource(MediaFiles, '/api/mediafile/<string:product_id>')
 
 class DeleteMediaFiles(Resource):
     """Deletes Media files based on their filename"""
-
+    method_decorators = [login_required]
     def delete(self, filename):
         """Delete a media file"""
         mediafile = MediaFile.query.get(filename)

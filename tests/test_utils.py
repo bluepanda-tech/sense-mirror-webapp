@@ -1,8 +1,17 @@
+"""Testing functions in utils file"""
+import os
+
+from cime_mirror_engine.config import BASE_MEDIA_DIR, MAX_PRODUCTS
 from cime_mirror_engine.utils import (
     file_type,
     allowed_file,
     allowed_product_id,
+    create_mediafiles_folder,
 )
+
+def test_create_mediafiles_folder():
+    """Makes sure the media folder is created on run"""
+    assert os.path.exists(BASE_MEDIA_DIR)
 
 def test_file_type():
     sample_files = {
@@ -34,4 +43,4 @@ def test_allowed_product_id():
     for sample_id in sample_ids:
         assert allowed_product_id(sample_id) == sample_ids[sample_id]
     for allowed_id in range(MAX_PRODUCTS):
-        assert allowed_product_id(allowed_id+1) == True
+        assert allowed_product_id(allowed_id+1)

@@ -1,6 +1,58 @@
+"""Database Models using Flask SQLAlchemy as ORM"""
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash,
+)
+
 from .config import ALLOWED_FILE_EXTENSIONS
 from .app import db
 from .utils import allowed_file, allowed_product_id
+
+class User(db.Model):
+    """User that will have access to the mirror's webapp
+    only need to provide passwords, no usernames, as this
+    application will be served on a local net.
+
+    We will only create one superuser"""
+    __tablename__ = 'app_user'
+
+    user_id = db.Column(db.Integer, primary_key=True)
+    pw_hash = db.Column(db.String(200))
+
+    def __init__(self, password):
+        # Only one PIN will be available to access the app.
+        # This PIN is given right at the beginning and needs to
+        # be written down.
+        #TODO set up an email client for changing the password
+        if User.query.count() == 0:
+            self.set_password(str(password))
+        else:
+            raise ValueError('A user and a password were already set')
+
+    def set_password(self, password):
+        self.pw_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.pw_hash, password)
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.user_id)
+
+    def reset_password(self):
+        #TODO finish this
+        pass
+
+    def __repr__(self):
+        return str(self.user_id)
 
 class Product(db.Model):
     """Products to be showcased by the UI"""
@@ -9,7 +61,12 @@ class Product(db.Model):
     product_id = db.Column(db.Integer, primary_key=True) # Only from 1 - MAX_PRODUCTS
     name = db.Column(db.String(80), nullable=False)
     description_txt = db.Column(db.Text)
-    media_files = db.relationship('MediaFile', backref='product', lazy=True, cascade="all, delete-orphan")
+    media_files = db.relationship(
+        'MediaFile',
+        backref='product',
+        lazy=True,
+        cascade="all, delete-orphan",
+    )
     thumbnail = db.Column(db.Text, default=None) # Name of thumbnail file
     is_displayed = db.Column(db.Boolean, nullable=False, default=True)
 
