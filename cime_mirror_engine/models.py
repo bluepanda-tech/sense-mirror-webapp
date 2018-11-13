@@ -86,6 +86,7 @@ class Product(db.Model):
         else:
             raise ValueError('Thumbnail filename not allowed')
 
+    @staticmethod
     def product_exists(product_id):
         #TODO add a sekf to this thing
         """Checks if the item already exists based on the item number"""
