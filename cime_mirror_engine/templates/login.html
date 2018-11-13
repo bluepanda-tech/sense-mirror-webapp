@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="bg-img" style="background: linear-gradient(rgba(16,50,73,.6), rgba(255,255,255,.2)), url({{ url_for('static', filename='img/login.jpg')}}) top center no-repeat;"></div>
+
+{% for message in get_flashed_messages() %}
+<div class="alert alert-info" role="alert">
+    {{message}}
+</div>
+{% endfor %}
+
+<div id="login-content">
+  <div class="container">
+    <div class="col-md-6 offset-md-3">
+      <div class="card login-card">
+        <div class="card-header">
+            <h1>BluePanda</h1>
+            <p>Bienvenido</p>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="/auth/login/">
+            <div class="input-group">
+              <input type="text" name="pin" pattern="[0-9]*" inputmode="numeric" maxlength="4" required placeholder="PIN" style="-webkit-text-security: disc;">
+              <input type="submit" class="btn btn-login" value="Ingresar">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

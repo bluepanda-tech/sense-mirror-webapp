@@ -10,7 +10,7 @@ def test_uploadthumbnail():
     product_id = 1
     with open('./tests/etc/sample.jpg', 'rb') as file:
         response = client.post(
-            '/api/thumbnail/{}'.format(product_id),
+            '/api/thumbnail/{}/'.format(product_id),
             data={'file' : file},
             content_type='multipart/form-data'
         )
@@ -24,10 +24,11 @@ def test_uploadthumbnail():
     # Doing it again to check old file gets deleted
     with open('./tests/etc/sample.jpg', 'rb') as file:
         response = client.post(
-            '/api/thumbnail/{}'.format(product_id),
+            '/api/thumbnail/{}/'.format(product_id),
             data={'file' : file},
             content_type='multipart/form-data',
         )
+    assert response.status_code == 200
     assert not os.path.exists(os.path.join(BASE_MEDIA_DIR, tn_filename))
     # Remove image
     filename = Product.query.get(product_id).thumbnail
@@ -38,7 +39,7 @@ def test_mediafiles_post():
     product_id = 1
     with open('./tests/etc/sample.jpg', 'rb') as file:
         response = client.post(
-            '/api/mediafile/{}'.format(product_id),
+            '/api/mediafile/{}/'.format(product_id),
             data={'file' : file},
             content_type='multipart/form-data'
         )
@@ -54,7 +55,7 @@ def test_mediafiles_delete():
     """Tests the deletion of media files"""
     mediafile = MediaFile.query.filter_by(product_id=1).one()
     m_filename = mediafile.filename
-    response = client.delete('/api/mediafile/{}'.format(
+    response = client.delete('/api/mediafile/{}/'.format(
         m_filename,
     ))
     # Check response

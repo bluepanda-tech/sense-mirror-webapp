@@ -17,3 +17,4 @@ login = LoginManager(app)
 
 from . import auth
 from . import resources
+from . import views

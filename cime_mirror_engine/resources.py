@@ -56,7 +56,7 @@ class UploadThumbnail(Resource):
             return 'File not allowed. Upload only {} files'.format(
                 [ftype for ftype in ALLOWED_FILE_EXTENSIONS]
             )
-api.add_resource(UploadThumbnail, '/api/thumbnail/<string:product_id>')
+api.add_resource(UploadThumbnail, '/api/thumbnail/<string:product_id>/')
 
 class AddMediaFile(Resource):
     """Upload or delete media files to be shown in the product's description"""
@@ -81,7 +81,7 @@ class AddMediaFile(Resource):
             return "Product reached max number of mediafiles: {}".format(MAX_STORED_MEDIA_FILES)
         elif not Product.product_exists(product_id):
             return "Product ID is invalid."
-api.add_resource(AddMediaFile, '/api/mediafile/<string:product_id>')
+api.add_resource(AddMediaFile, '/api/mediafile/<string:product_id>/')
 
 class DeleteMediaFile(Resource):
     """Deletes Media files based on their filename"""
@@ -96,4 +96,4 @@ class DeleteMediaFile(Resource):
             return "File Deleted"
         else:
             return "File doesn't exist"
-api.add_resource(DeleteMediaFile, '/api/mediafile/<string:filename>')
+api.add_resource(DeleteMediaFile, '/api/mediafile/<string:filename>/')

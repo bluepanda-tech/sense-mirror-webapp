@@ -1,7 +1,9 @@
-"""Unit tests for models and their methods"""
+"""Unit tests for models and their methods. The
+create_superuser function is ran in the __init__ file,
+since we need that for the APIs and Auth tests"""
 import pytest
 
-from run import create_items
+from run import create_items, create_superuser
 from cime_mirror_engine.app import app, db
 from cime_mirror_engine.models import Product, MediaFile, User
 from cime_mirror_engine.config import MAX_PRODUCTS
@@ -17,6 +19,7 @@ def test_db_connection():
 #######################################
 #########  USER MODEL TESTS ###########
 #######################################
+
 def test_user():
     """Test the creation and validation of users. Also makes
     sure that only one user can exist at a time."""

@@ -1,9 +1,10 @@
 """This file handle user authentications"""
-from flask import request
+from flask import request, redirect, flash
 from flask_restful import Resource
 from flask_login import (
     login_user,
     logout_user,
+    login_required,
 )
 
 from .app import (
@@ -39,15 +40,17 @@ class LogIn(Resource):
         user = User.query.first() # Only one superuser
         pin = request.form['pin'] # Get PIN from form
         if not user.check_password(pin): # Validate PIN
-            return 'Invalid Pin'
+            flash("PIN Incorrecto")
+            return redirect('/login/')
         login_user(user)
-        return 'Logged in successfully'
-api.add_resource(LogIn, '/auth/login')
+        flash("Bienvenido de Nuevo")
+        return redirect('/dashboard/')
+api.add_resource(LogIn, '/auth/login/', endpoint='login')
 
 class LogOut(Resource):
     """Endopint to LogOut the user"""
+    method_decorators = [login_required]
     def get(self):
-        #TODO validation to check if user is actually logged in
         logout_user()
-        return "Logged Out Successfully"
-api.add_resource(LogOut, '/auth/logout')
+        return redirect('/login/')
+api.add_resource(LogOut, '/auth/logout/', endpoint='logout')

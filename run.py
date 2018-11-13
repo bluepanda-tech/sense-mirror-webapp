@@ -15,7 +15,15 @@ def create_items():
             print("Product already exists")
     db.session.commit()
 
+def create_superuser():
+    """Creates a superuser the first time of initiating the program"""
+    if models.User.query.count() == 0:
+        su = models.User('1234') #TODO find better way to do this
+        db.session.add(su)
+        db.session.commit()
+
 if __name__ == '__main__':
     db.create_all()
     create_items()
+    create_superuser()
     app.run()

@@ -69,7 +69,7 @@ class Product(db.Model):
         lazy=True,
         cascade="all, delete-orphan",
     )
-    thumbnail = db.Column(db.Text, default=None) # Name of thumbnail file
+    thumbnail = db.Column(db.Text, default='login.jpg') # Name of thumbnail file
     is_displayed = db.Column(db.Boolean, nullable=False, default=True)
 
     def __init__(self, product_id):
@@ -87,6 +87,7 @@ class Product(db.Model):
             raise ValueError('Thumbnail filename not allowed')
 
     def product_exists(product_id):
+        #TODO add a sekf to this thing
         """Checks if the item already exists based on the item number"""
         exists = Product.query.filter_by(product_id=product_id).scalar() is not None
         return exists
