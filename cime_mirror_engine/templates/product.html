@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="header header-sm"></div>
+<div id="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card dashboard-card">
+                    <form method="POST" action="/api/product/{{product.id}}/">
+                        <div class="card-header align-left">
+                            <h3 class="card-header-title">Editar Producto</h3>
+                        </div>
+                        <div class="card-body">
+                            <h5>Nombre</h5>
+                            <input type="text" name="name" value="{{product.name}}" placeholder="Nombre del Producto">
+                            <br>
+                            <h5>Descripión</h5>
+                            {% if product.description is not none %}
+                            <textarea type="text" name="description" placeholder="Descripción del Producto">{{product.description}}</textarea>
+                            {% else %}
+                            <textarea type="text" name="description" placeholder="Descripción del Producto"></textarea>
+                            {% endif %}
+                            <h5>Mostrándose</h5>
+                            <label class="switch">
+                                {% if product.is_displayed %}
+                                    <input type="checkbox" name="is_displayed" checked/>
+                                {% else %}
+                                    <input type="checkbox" name="is_displayed"/>
+                                {% endif %}
+                                    <span class="slider-round"></span>
+                            </label>
+                            <input type="submit" class="btn btn-edit" value="Guardar">
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="card dashboard-card">
+                    <div class="card-header align-left">
+                        <h2 class="card-header-title">Multimedia</h2>
+                    </div>
+                    <div class="card-body edit-product">
+                        <h5>Thumbnail</h5>
+                        <video autoplay width="100%" preload="metadata" poster="{{ url_for('static', filename='media/'+product.thumbnail) }}" muted>
+                            <source src="{{ url_for('static', filename='media/'+product.thumbnail) }}" type="video/mp4">
+                        </video>
+                        <br>
+                        <br>
+                        <br>
+                        <p>Reemplazar thumbnail:</p>
+                        <form action="/api/thumbnail/{{product.id}}/" enctype="multipart/form-data" method="POST">
+                            <input type="file" name="file">
+                            <input type="submit" value="Reemplazar" class="btn btn-edit">
+                        </form>
+                        <hr>
+                        <br>
+                        <h5>Archivos multimedia</h5>
+                        {% if product.mediafiles|length > 0 %}
+                        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+                            <ol class="carousel-indicators">
+                                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+                                {% if product.mediafiles|length > 1 %}
+                                <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+                                {% endif %}
+                                {% if product.mediafiles|length > 2 %}
+                                <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+                                {% endif %}
+                            </ol>
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img class="d-block w-100" src="{{ url_for('static', filename='media/'+product.mediafiles[0].filename) }}">
+                                    <a href="#"><span class="delete-file" data-toggle="modal" data-target="#DeleteModal1">&times;</span></a>
+                                </div>
+                                <!-- Modal -->
+                                <div class="modal fade" id="DeleteModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Eliminar Archivo</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Seguro que desea eliminar este archivo?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                                <a href="/api/mediafile/delete/{{product.mediafiles[0].filename}}/" class="btn btn-danger">Eliminar</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if product.mediafiles|length > 1 %}
+                                <div class="carousel-item">
+                                    <img class="d-block w-100" src="{{ url_for('static', filename='media/'+product.mediafiles[1].filename) }}">
+                                    <a href="#"><span class="delete-file" data-toggle="modal" data-target="#DeleteModal2">&times;</span></a>
+                                </div>
+                                <!-- Modal -->
+                                <div class="modal fade" id="DeleteModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Eliminar Archivo</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Seguro que desea eliminar este archivo?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                                <a href="/api/mediafile/delete/{{product.mediafiles[1].filename}}/" class="btn btn-danger">Eliminar</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if product.mediafiles|length > 2 %}
+                                <div class="carousel-item">
+                                    <img class="d-block w-100" src="{{ url_for('static', filename='media/'+product.mediafiles[2].filename) }}">
+                                    <a href="#"><span class="delete-file" data-toggle="modal" data-target="#DeleteModal3">&times;</span></a>
+                                </div>
+                                <!-- Modal -->
+                                <div class="modal fade" id="DeleteModal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Eliminar Archivo</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Seguro que desea eliminar este archivo?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                                <a href="/api/mediafile/delete/{{product.mediafiles[2].filename}}/" class="btn btn-danger">Eliminar</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                        {% else %}
+                        <p>No hay imagenes/videos para desplegar</p>
+                        {% endif %}
+                        {% if product.mediafiles|length < 3 %}
+                        <br>
+                        <br>
+                        <p>Añadir nuevo archivo multimedia:</p>
+                        <form enctype="multipart/form-data" action="/api/mediafile/{{product.id}}/" method="POST">
+                            <input type="file" name="file">
+                            <input type="submit" value="Añadir" class="btn btn-edit">
+                        </form>
+                        {% else %}
+                        <br>
+                        <br>
+                        <p>Alcanzó el límite de imagenes/videos.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

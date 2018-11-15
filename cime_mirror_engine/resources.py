@@ -1,7 +1,7 @@
 """Contains main API resources"""
 import os, uuid
 
-from flask import request
+from flask import request, flash, redirect
 from flask_restful import Resource
 from werkzeug.utils import secure_filename
 from flask_login import login_required
@@ -24,6 +24,25 @@ from .utils import (
     file_type,
     allowed_file,
 )
+
+class EditProductInfo(Resource):
+    """API to edit a products name, description and is_displayed"""
+    #TODO Add validation here
+    def post(self, product_id):
+        name = request.form['name']
+        description = request.form['description']
+        is_displayed = False
+        if request.form.get('is_displayed') is not None:
+            is_displayed = True
+        product = Product.query.get(product_id)
+        product.name = name
+        product.description_txt = description
+        product.is_displayed = is_displayed
+        db.session.add(product)
+        db.session.commit()
+        flash("Producto editado exitosamente")
+        return redirect('/dashboard/product/{}/'.format(product_id))
+api.add_resource(EditProductInfo, '/api/product/<string:product_id>/')
 
 class UploadThumbnail(Resource):
     """Upload either a video or an image file to be used as the product thumbnail"""
@@ -48,14 +67,17 @@ class UploadThumbnail(Resource):
             db.session.commit()
             #TODO add an event to tell the UI to look for a new thumbnail, so that the command above is
             #executed only when the UI sends an event indicating it is now aware of the change
-            if old_filename is not None:
+            if old_filename is not None and\
+             'default-thumbnail' not in old_filename:
                 os.remove(os.path.join(BASE_MEDIA_DIR, old_filename))
-            return "File Uploaded"
+            flash("Archivo subido con éxito")
+            return redirect('/dashboard/product/{}/'.format(product_id))
         else:
             #TODO add bad status codes to this type of responses
-            return 'File not allowed. Upload only {} files'.format(
+            flash('File not allowed. Upload only {} files'.format(
                 [ftype for ftype in ALLOWED_FILE_EXTENSIONS]
-            )
+            ))
+            return redirect('/dashboard/product/{}/'.format(product_id))
 api.add_resource(UploadThumbnail, '/api/thumbnail/<string:product_id>/')
 
 class AddMediaFile(Resource):
@@ -74,26 +96,37 @@ class AddMediaFile(Resource):
             new_file = MediaFile(product_id, filename)
             db.session.add(new_file)
             db.session.commit()
-            return "File Uploaded"
+            flash("Archivo guardado con éxito")
+            return redirect('/dashboard/product/{}/'.format(product_id))
         elif not allowed_file(file.filename, ALLOWED_FILE_EXTENSIONS):
-            return "File not allowed, must be of format {}".format([filetype for filetype in ALLOWED_FILE_EXTENSIONS])
+            flash("File not allowed, must be of format {}".format([filetype for filetype in ALLOWED_FILE_EXTENSIONS]))
+            return redirect('/dashboard/product/{}/'.format(product_id))
         elif not MediaFile.query.filter_by(product_id=product_id).count() < MAX_STORED_MEDIA_FILES:
-            return "Product reached max number of mediafiles: {}".format(MAX_STORED_MEDIA_FILES)
+            flash("Product reached max number of mediafiles: {}".format(MAX_STORED_MEDIA_FILES))
+            return redirect('/dashboard/product/{}/'.format(product_id))
         elif not Product.product_exists(product_id):
-            return "Product ID is invalid."
+            flash("Producto invalido")
+            return redirect('/dashboard/product/{}/'.format(product_id))
+        else:
+            flash("Seleccione un archivo")
+            return redirect('/dashboard/product/{}/'.format(product_id))
 api.add_resource(AddMediaFile, '/api/mediafile/<string:product_id>/')
 
+#TODO Se puede undir el boton de guardar o anadir sin seleccionar archivo
+# Make client disable button until archive is mounted
 class DeleteMediaFile(Resource):
     """Deletes Media files based on their filename"""
     method_decorators = [login_required]
-    def delete(self, filename):
+    def get(self, filename):
         """Delete a media file"""
         mediafile = MediaFile.query.get(filename)
+        product_id = mediafile.product_id
         if mediafile is not None:
             os.remove(os.path.join(BASE_MEDIA_DIR, filename))
             db.session.delete(mediafile)
             db.session.commit()
-            return "File Deleted"
-        else:
-            return "File doesn't exist"
-api.add_resource(DeleteMediaFile, '/api/mediafile/<string:filename>/')
+            flash("Archivo eliminado con éxito")
+            return redirect('/dashboard/product/{}/'.format(product_id))
+        flash("Lo siento, no pudimos eliminar el archivo: Archivo inexistente.")
+        return redirect('/dashboard/product/{}/'.format(product_id))
+api.add_resource(DeleteMediaFile, '/api/mediafile/delete/<string:filename>/')

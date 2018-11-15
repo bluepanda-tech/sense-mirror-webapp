@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
           <!--     Fonts and icons     -->
         <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
         <!-- CSS Files -->
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"/>
         <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='css/style.css') }}" />
@@ -15,6 +16,25 @@
         <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     </head>
     <body>
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-info" role="alert">
+            {{message}}
+        </div>
+        {% endfor %}
+        <nav class="navbar navbar-transparent">
+            <div class="container-fluid">
+                <a href="/dashboard/"><i class="fas fa-home fa-2x"></i></a>
+                <div class="dropdown show">
+                    <a href="#" class="dropdown-toggle" role="button" id="userMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-user fa-2x"></i>
+                    </a>
+
+                    <div class="dropdown-menu" aria-labelledby="UserMenu">
+                        <a class="dropdown-item" href="/auth/logout/">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
         <div id="main">
             {% block content %}{% endblock %}
         </div>

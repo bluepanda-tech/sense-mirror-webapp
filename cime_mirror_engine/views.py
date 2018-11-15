@@ -22,6 +22,7 @@ def index():
 @app.route('/login/')
 def login_ui():
     """Route for user's login UI"""
+    #TODO if user is authenticated redirect to dashboard
     return render_template('login.html')
 
 @app.route('/dashboard/')
@@ -29,6 +30,7 @@ def login_ui():
 def dashboard():
     """Route for official BluePanda Dahsboard"""
     products = [dict(
+        product_id=str(product.product_id),
         name=product.name,
         description=product.description_txt,
         thumbnail=product.thumbnail,
@@ -37,18 +39,20 @@ def dashboard():
     ) for product in Product.query.all()]
     return render_template('dashboard.html', products=products)
 
-@app.route('/dashboard/edit/<product_id>/')
+@app.route('/dashboard/product/<product_id>/')
 @login_required
 def edit_product(product_id):
     """View to edit individual products"""
-    product_obj = Product.query.get(product_id)
+    product_obj = Product.query.get(int(product_id))
     if product_obj is not None:
         product = {
+            'id' : product_id,
             'name' : product_obj.name,
             'description' : product_obj.description_txt,
             'thumbnail' : product_obj.thumbnail,
             'mediafiles' : product_obj.media_files,
+            'is_displayed' : product_obj.is_displayed,
         }
-        return render_template('edit_product.html', product=product)
+        return render_template('product.html', product=product)
     flash("Producto no encontrado. ID invalida.")
     return redirect('/dashboard/')

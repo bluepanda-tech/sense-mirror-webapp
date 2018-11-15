@@ -1,3 +1,5 @@
+"""Configuration file containing the different configuration for our app,
+depending on what environment it is run"""
 import os
 
 MAX_PRODUCTS = 10

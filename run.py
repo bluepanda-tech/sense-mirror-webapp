@@ -1,3 +1,4 @@
+"""Script to be run on boot/startup"""
 from cime_mirror_engine.app import app, db
 from cime_mirror_engine import models
 from cime_mirror_engine.utils import allowed_product_id
