@@ -6,7 +6,7 @@ MAX_PRODUCTS = 10
 MAX_STORED_MEDIA_FILES = 3
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 BASE_MEDIA_DIR = os.path.join(BASEDIR, 'static/media')
-ALLOWED_FILE_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'mp4'])
+ALLOWED_FILE_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'])
 
 class Config:
     """Base configuration"""
