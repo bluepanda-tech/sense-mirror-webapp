@@ -1,10 +1,12 @@
 """Database Models using Flask SQLAlchemy as ORM"""
+import os
+
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash,
 )
 
-from .config import ALLOWED_FILE_EXTENSIONS
+from .config import ALLOWED_FILE_EXTENSIONS, BASE_MEDIA_DIR
 from .app import db
 from .utils import allowed_file, allowed_product_id
 
@@ -108,7 +110,51 @@ class MediaFile(db.Model):
             self.filename = filename
         else:
             raise ValueError('Filename not allowed: "{}"'.format(filename))
-    
+
     def __repr__(self):
         return "{}".format(self.filename)
-    
+
+class DeletedFile(db.Model):
+    """Files to be deleted by the GUI once it updates"""
+    __tablename__ = 'deleted_files'
+
+    filename = db.Column(db.Text, primary_key=True, nullable=False)
+    deleted = db.Column(db.Boolean, default=False)
+
+    def __init__(self, filename):
+        if filename is not None:
+            if os.path.exists(os.path.join(BASE_MEDIA_DIR, filename)):
+                self.filename = filename
+                self.deleted = False
+
+    @staticmethod
+    def delete_files():
+        """Deletes files from disk"""
+        files_to_delete = DeletedFile.query.filter_by(deleted=False).all()
+        for file in files_to_delete:
+            if file is not None and 'default-thumbnail' not in file:
+                try:
+                    os.remove((os.path.join(BASE_MEDIA_DIR, file.filename)))
+                except:
+                    print("File doesn't exist")
+                    #TODO better handling of this thing
+                    return "File Doesn't Exist"
+                file.deleted = True
+                db.session.add(file)
+        db.session.commit()
+
+class ProductEdit(db.Model):
+    """Registers any database transaction and/or edition of a
+    product alongside a column to check if the GUI already
+    applied this changes. This is helpful because the GUI will be
+    constantly looking for unapplied changes. If they are found,
+    the whole Tkinter Window will be updated"""
+    __tablename__ = 'product_edits'
+
+    edition_id = db.Column(db.Integer, primary_key=True)
+    edition_descr = db.Column(db.Text)
+    was_applied = db.Column(db.Boolean, default=False)
+
+    def __init__(self, event_descr):
+        self.edition_descr = event_descr
+        self.was_applied = False

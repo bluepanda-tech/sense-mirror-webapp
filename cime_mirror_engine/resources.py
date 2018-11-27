@@ -14,6 +14,8 @@ from .app import (
 from .models import (
     Product,
     MediaFile,
+    DeletedFile,
+    ProductEdit,
 )
 from .config import (
     BASE_MEDIA_DIR,
@@ -39,6 +41,18 @@ class EditProductInfo(Resource):
         product.description_txt = description
         product.is_displayed = is_displayed
         db.session.add(product)
+        # Saving event in Database
+        event = {
+            "[EditProductInfo]" : {
+                "id" : product_id,
+                "name" : name,
+                "description" : description,
+                "is_displayed" : is_displayed,
+            }
+        }
+        new_event = ProductEdit(event_descr=str(event))
+        db.session.add(new_event)
+
         db.session.commit()
         flash("Producto editado exitosamente")
         return redirect('/dashboard/product/{}/'.format(product_id))
@@ -48,7 +62,8 @@ class UploadThumbnail(Resource):
     """Upload either a video or an image file to be used as the product thumbnail"""
     method_decorators = [login_required]
     def post(self, product_id):
-        """API endpoint to upload a product's thumbnail"""
+        """API endpoint to upload a product's thumbnail. The actual deletion
+        of the file in the host's disk is performed by the UI container"""
 
         #TODO log this and better error handling
 
@@ -64,12 +79,19 @@ class UploadThumbnail(Resource):
             file.save(os.path.join(BASE_MEDIA_DIR, filename))
             product.add_thumbnail_filename(filename)
             db.session.add(product)
+            # Actual file is deleted only by the GUI
+            file_to_delete = DeletedFile(old_filename)
+            db.session.add(file_to_delete)
+            # Saving event in Database
+            event = {
+                "[UploadThumbnail]" : {
+                    "id" : product_id,
+                    "filename" : filename,
+                }
+            }
+            new_event = ProductEdit(event_descr=str(event))
+            db.session.add(new_event)
             db.session.commit()
-            #TODO add an event to tell the UI to look for a new thumbnail, so that the command above is
-            #executed only when the UI sends an event indicating it is now aware of the change
-            if old_filename is not None and\
-             'default-thumbnail' not in old_filename:
-                os.remove(os.path.join(BASE_MEDIA_DIR, old_filename))
             flash("Archivo subido con éxito")
             return redirect('/dashboard/product/{}/'.format(product_id))
         else:
@@ -95,6 +117,15 @@ class AddMediaFile(Resource):
             file.save(file_path)
             new_file = MediaFile(product_id, filename)
             db.session.add(new_file)
+            # Saving event in Database
+            event = {
+                "[AddMediaFile]" : {
+                    "id" : product_id,
+                    "filename" : filename,
+                }
+            }
+            new_event = ProductEdit(event_descr=str(event))
+            db.session.add(new_event)
             db.session.commit()
             flash("Archivo guardado con éxito")
             return redirect('/dashboard/product/{}/'.format(product_id))
@@ -122,8 +153,18 @@ class DeleteMediaFile(Resource):
         mediafile = MediaFile.query.get(filename)
         product_id = mediafile.product_id
         if mediafile is not None:
-            os.remove(os.path.join(BASE_MEDIA_DIR, filename))
+            file_to_delete = DeletedFile(filename)
+            db.session.add(file_to_delete)
             db.session.delete(mediafile)
+            # Saving event in Database
+            event = {
+                "[DeleteMediaFile]" : {
+                    "id" : product_id,
+                    "filename" : mediafile,
+                }
+            }
+            new_event = ProductEdit(event_descr=str(event))
+            db.session.add(new_event)
             db.session.commit()
             flash("Archivo eliminado con éxito")
             return redirect('/dashboard/product/{}/'.format(product_id))
