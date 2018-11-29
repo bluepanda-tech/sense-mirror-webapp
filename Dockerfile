@@ -8,14 +8,9 @@ EXPOSE 5000
 
 COPY ./environments/requirements.txt /
 
-RUN apt-get update
-#RUN apt-get install python3-pip \
-#    && pip3 install --upgrade pip \
-#    && pip3 install --upgrade pip3 \
-#    && apt-get install python3-dev \
-#    && apt-get install libpq-dev \
-#    && apt-get autoremove \
-#    && apt-get autoclean \
+RUN apt-get update \
+    && apt-get autoremove \
+    && apt-get autoclean \
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
