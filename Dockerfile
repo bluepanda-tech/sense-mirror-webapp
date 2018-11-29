@@ -1,4 +1,4 @@
-FROM resin/rpi-raspbian:latest
+FROM arm32v7/python:3
 
 LABEL maintainer="Sebastian Arboleda <sebasarboleda22@gmail.com"
 LABEL Name=cime_mirror_engine 
@@ -8,13 +8,19 @@ EXPOSE 5000
 
 COPY ./environments/requirements.txt /
 
-RUN apt-get update \
-    && apt-get autoremove \
-    && apt-get autoclean \
-    && pip install -r requirements.txt
+RUN apt-get update
+#RUN apt-get install python3-pip \
+#    && pip3 install --upgrade pip \
+#    && pip3 install --upgrade pip3 \
+#    && apt-get install python3-dev \
+#    && apt-get install libpq-dev \
+#    && apt-get autoremove \
+#    && apt-get autoclean \
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
 
 COPY ./cime_mirror_engine /cime_mirror_engine
 
-WORKDIR /cime_mirror_engine
+COPY ./run.py /
 
-CMD /bin/bash -c "python run.py"
+CMD ["python", "run.py"]
