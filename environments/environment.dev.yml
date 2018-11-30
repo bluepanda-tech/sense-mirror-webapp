@@ -48,6 +48,7 @@ dependencies:
     - flask-migrate==2.3.0
     - flask-restful==0.3.6
     - flask-sqlalchemy==2.3.2
+    - gunicorn==19.9.0
     - itsdangerous==1.1.0
     - jinja2==2.10
     - mako==1.0.7
