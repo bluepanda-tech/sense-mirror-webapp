@@ -18,4 +18,4 @@ COPY ./cime_mirror_engine /cime_mirror_engine
 
 COPY ./run.py /
 
-CMD ["python", "run.py"]
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "run:app"]
