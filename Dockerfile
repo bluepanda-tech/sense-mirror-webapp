@@ -4,7 +4,7 @@ LABEL maintainer="Sebastian Arboleda <sebasarboleda22@gmail.com"
 LABEL Name=cime_mirror_engine 
 LABEL Version=0.0.1
 
-EXPOSE 5000
+EXPOSE 8000
 
 COPY ./environments/requirements.txt /
 
@@ -18,4 +18,4 @@ COPY ./cime_mirror_engine /cime_mirror_engine
 
 COPY ./run.py /
 
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "run:app"]
+CMD ["gunicorn", "-w", "1", "-b", "0.0.0.0:8000", "run:app"]
