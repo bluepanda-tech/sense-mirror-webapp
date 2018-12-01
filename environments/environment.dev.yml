@@ -64,5 +64,3 @@ dependencies:
     - pytz==2018.7
     - sqlalchemy==1.2.14
     - werkzeug==0.14.1
-prefix: /home/hacknoob/anaconda3/envs/cime_mirror_engine
-
