@@ -9,7 +9,8 @@ services:
     ports:
       - 8000
     volumes:
-      - ./cime_mirror_engine:/app
+      - ./cime_mirror_engine:/cime_mirror_engine
+      - media:/cime_mirror_engine/static/media
     depends_on:
       - postgres
 
@@ -19,6 +20,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - 80:80
+    volumes:
+      - media:/opt/static/media
     depends_on:
       - web_app
   
@@ -32,3 +35,4 @@ services:
 
 volumes:
   pgdata: {}
+  media: {}
