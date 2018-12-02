@@ -80,8 +80,11 @@ class UploadThumbnail(Resource):
             product.add_thumbnail_filename(filename)
             db.session.add(product)
             # Actual file is deleted only by the GUI
-            file_to_delete = DeletedFile(old_filename)
-            db.session.add(file_to_delete)
+            try:
+                file_to_delete = DeletedFile(old_filename)
+                db.session.add(file_to_delete)
+            except ValueError as e:
+                print(e)
             # Saving event in Database
             event = {
                 "[UploadThumbnail]" : {

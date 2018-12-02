@@ -122,10 +122,13 @@ class DeletedFile(db.Model):
     deleted = db.Column(db.Boolean, default=False)
 
     def __init__(self, filename):
-        if filename is not None:
+        if filename is not None and 'default-thumbnail' not in filename:
             if os.path.exists(os.path.join(BASE_MEDIA_DIR, filename)):
                 self.filename = filename
                 self.deleted = False
+        else:
+            # Exception handled by AddThumbnail Resource class API
+            raise ValueError("Cannot delete the default-thumbnail file")
 
     @staticmethod
     def delete_files():
