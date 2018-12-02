@@ -1,8 +1,0 @@
-version: '2.1'
-
-services:
-  cime_mirror:
-    image: cime_mirror_engine
-    build: .
-    ports:
-      - 5000:5000

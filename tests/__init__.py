@@ -1,7 +1,7 @@
 """Initial configuration for the tests"""
-from cime_mirror_engine.app import app, db
-from cime_mirror_engine.config import Test
-from cime_mirror_engine.models import User
+from web_app.app import app, db
+from web_app.config import Test
+from web_app.models import User
 from run import create_superuser
 
 #Configuration is changed for testing

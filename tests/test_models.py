@@ -4,9 +4,9 @@ since we need that for the APIs and Auth tests"""
 import pytest
 
 from run import create_items, create_superuser
-from cime_mirror_engine.app import app, db
-from cime_mirror_engine.models import Product, MediaFile, User
-from cime_mirror_engine.config import MAX_PRODUCTS
+from web_app.app import app, db
+from web_app.models import Product, MediaFile, User
+from web_app.config import MAX_PRODUCTS
 
 def test_db_connection():
     """Making sure we are not messing around with the actual db"""

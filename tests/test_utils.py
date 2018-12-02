@@ -1,8 +1,8 @@
 """Testing functions in utils file"""
 import os
 
-from cime_mirror_engine.config import BASE_MEDIA_DIR, MAX_PRODUCTS
-from cime_mirror_engine.utils import (
+from web_app.config import BASE_MEDIA_DIR, MAX_PRODUCTS
+from web_app.utils import (
     file_type,
     allowed_file,
     allowed_product_id,
@@ -35,7 +35,7 @@ def test_allowed_file():
         assert allowed_file(samplefile) == sample_files[samplefile]
 
 def test_allowed_product_id():
-    from cime_mirror_engine.config import MAX_PRODUCTS
+    from web_app.config import MAX_PRODUCTS
     sample_ids = {
         0 : False,
         '1' : False,

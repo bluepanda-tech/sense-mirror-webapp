@@ -1,9 +1,9 @@
 """Script to be run on boot/startup"""
 import time
-from cime_mirror_engine.app import app, db
-from cime_mirror_engine import models
-from cime_mirror_engine.utils import allowed_product_id
-from cime_mirror_engine.config import MAX_PRODUCTS
+from web_app.app import app, db
+from web_app import models
+from web_app.utils import allowed_product_id
+from web_app.config import MAX_PRODUCTS
 
 def create_items():
     """Creates all products in the DB"""

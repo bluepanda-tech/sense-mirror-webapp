@@ -3,9 +3,9 @@ TODO: You should NOT be accessing the endpoints directly as unittesting...
 leave that for more advanced test"""
 import os
 from tests import client
-from cime_mirror_engine.app import app, db
-from cime_mirror_engine.config import BASE_MEDIA_DIR
-from cime_mirror_engine.models import Product, MediaFile, ProductEdit
+from web_app.app import app, db
+from web_app.config import BASE_MEDIA_DIR
+from web_app.models import Product, MediaFile, ProductEdit
 """
 def test_uploadthumbnail():
     #Tests the function that uploads a thumbnail

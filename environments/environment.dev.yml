@@ -1,4 +1,4 @@
-name: cime_mirror_engine
+name: web_app
 channels:
   - defaults
 dependencies:
