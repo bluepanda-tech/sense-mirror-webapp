@@ -14,7 +14,7 @@ class Config:
 
 class Dev(Config):
     """Configuration to be used in Dev environments"""
-    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:mysecretpassword@localhost/cime"
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:mysecretpassword@postgres/cime"
     SECRET_KEY = 'S@MpLe9SeCrEt#KeY'
     DEBUG = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False

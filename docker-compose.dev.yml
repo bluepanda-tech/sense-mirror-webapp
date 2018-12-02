@@ -10,6 +10,8 @@ services:
       - 8000
     volumes:
       - ./cime_mirror_engine:/app
+    depends_on:
+      - postgres
 
   nginx:
     build:
@@ -17,5 +19,16 @@ services:
       dockerfile: Dockerfile
     ports:
       - 80:80
-    links:
+    depends_on:
       - web_app
+  
+  postgres:
+    image: arm32v7/postgres
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_DB=cime
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: {}

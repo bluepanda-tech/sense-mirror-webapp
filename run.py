@@ -1,4 +1,5 @@
 """Script to be run on boot/startup"""
+import time
 from cime_mirror_engine.app import app, db
 from cime_mirror_engine import models
 from cime_mirror_engine.utils import allowed_product_id
@@ -23,8 +24,19 @@ def create_superuser():
         db.session.add(su)
         db.session.commit()
 
+def wait_for_postgres():
+    try:
+        db.engine.execute("SELECT 1")
+        print("connected to db")
+        return None
+    except:
+        time.sleep(1)
+        wait_for_postgres()
+
+wait_for_postgres()
+db.create_all()
+create_items()
+create_superuser()
+
 if __name__ == '__main__':
-    db.create_all()
-    create_items()
-    create_superuser()
     app.run()
