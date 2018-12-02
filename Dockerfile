@@ -1,7 +1,7 @@
 FROM arm32v7/python:3
 
 LABEL maintainer="Sebastian Arboleda <sebasarboleda22@gmail.com"
-LABEL Name=cime_mirror_engine 
+LABEL Name=web_app 
 LABEL Version=0.0.1
 
 EXPOSE 8000
@@ -14,7 +14,7 @@ RUN apt-get update \
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
-COPY ./cime_mirror_engine /cime_mirror_engine
+COPY ./web_app /web_app
 
 COPY ./run.py /
 
