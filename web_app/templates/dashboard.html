@@ -10,17 +10,20 @@
     {% for product in products %}
     <div class="row">
         <div class="col-md-12">
+            {% if product.is_displayed %}
             <div class="card dashboard-card">
+            {% else %}
+            <div class="card dashboard-card not-displayed">
+            {% endif %}
                 <div class="card-header">
-                    <h2 class="product-name">{{product.name}}</h2>
-                    <label class="switch">
-                    {% if product.is_displayed %}
-                        <input type="checkbox" checked disabled>
-                    {% else %}
-                        <input type="checkbox" disabled>
-                    {% endif %}
-                        <span class="slider-round"></span>
-                    </label>
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h2 class="product-name">{{product.name}}</h2>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/api/display/{{product.product_id}}/" class="btn btn-edit" style="width: 30%; margin: 0;">Mostrar Info</a>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <video autoplay width="100%" preload="metadata" poster="{{ url_for('static', filename='media/'+product.thumbnail) }}" muted>

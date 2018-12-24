@@ -24,6 +24,16 @@ def create_superuser():
         db.session.add(su)
         db.session.commit()
 
+def create_product_info_event():
+    """Creates row in ProductToDisplayInfo table that manages
+    products which further info will be displayed if doesn't
+    exists already"""
+    if models.ProductToDisplayInfo.query.count() == 0:
+        event = models.ProductToDisplayInfo()
+        db.session.add(event)
+        db.session.commit()
+        print("Event to display prod.info created...")
+
 def wait_for_postgres():
     try:
         db.engine.execute("SELECT 1")
@@ -37,6 +47,7 @@ wait_for_postgres()
 db.create_all()
 create_items()
 create_superuser()
+create_product_info_event()
 
 if __name__ == '__main__':
     app.run()

@@ -16,6 +16,7 @@ from .models import (
     MediaFile,
     DeletedFile,
     ProductEdit,
+    ProductToDisplayInfo,
 )
 from .config import (
     BASE_MEDIA_DIR,
@@ -174,3 +175,27 @@ class DeleteMediaFile(Resource):
         flash("Lo siento, no pudimos eliminar el archivo: Archivo inexistente.")
         return redirect('/dashboard/product/{}/'.format(product_id))
 api.add_resource(DeleteMediaFile, '/api/mediafile/delete/<string:filename>/')
+
+class ShowProductInfo(Resource):
+    """Adds product_id to row that will be read to display the
+    products information"""
+    method_decorators = [login_required]
+
+    def get(self, product_id):
+        # There should be only one existing
+        event = ProductToDisplayInfo.query.get(1)
+        
+        product = Product.query.get(product_id)
+        #Check that something isn't being displayed at the moment
+        if not product.is_displayed:
+            flash("Solo se pueden mostrar productos actualmente en exhibicion")
+            return redirect('/dashboard/')
+        if event.is_showing is True or event.was_showed is False:
+            flash("Hay un producto siendo mostrado, intente mas tarde")
+            return redirect('/dashboard/')
+        event.product_id = product_id
+        event.was_showed = False
+        db.session.commit()
+        flash("Mostrando producto...")
+        return redirect('/dashboard/')
+api.add_resource(ShowProductInfo, '/api/display/<product_id>/')

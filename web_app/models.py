@@ -161,3 +161,20 @@ class ProductEdit(db.Model):
     def __init__(self, event_descr):
         self.edition_descr = event_descr
         self.was_applied = False
+
+#TODO create event from webapp to UI instead of this table
+class ProductToDisplayInfo(db.Model):
+    """This registers a product which info is going to be
+    displayed by the UI. Will have only one row. This is
+    done in the meantime, while an event is created later on"""
+    __tablename__ = 'info_to_display'
+    
+    info_id = db.Column(db.Integer, primary_key=True)
+
+    product_id = db.Column(db.Integer)
+    was_showed = db.Column(db.Boolean, default=True)
+    is_showing = db.Column(db.Boolean, default=False)
+
+    def __init__(self):
+        if ProductToDisplayInfo.query.count() >= 1:
+            raise ValueError("Only one row may exist")
